@@ -18,7 +18,20 @@ export function generateReportHTML(
   relatorio: RelatorioSagrado,
   options: PDFGeneratorOptions = {}
 ): string {
-  const { filename = 'relatorio-thoth12.pdf', clientName = 'Cliente', clientDate = new Date().toLocaleDateString('pt-BR') } = options;
+  const {
+    filename = 'relatorio-thoth12.pdf',
+    clientName = 'Cliente',
+    clientDate = new Date().toLocaleDateString('pt-BR'),
+  } = options;
+
+  // Cores dos núcleos
+  const nucleoColors = {
+    identidade: '#6B21A8',
+    seguranca: '#008000',
+    merecimento: '#FFD700',
+  };
+
+  const nucleoColor = nucleoColors[relatorio.nucleoPredominante] || '#D4AF37';
 
   const html = `
 <!DOCTYPE html>
@@ -309,10 +322,10 @@ export function generateReportHTML(
     <div class="page">
         <!-- Header -->
         <div class="header">
-            <div class="ornament">✦ ◆ ✦</div>
+            <div class="ornament">✦ ☥ ✦</div>
             <h1>THOTH 12</h1>
-            <p>Sistema de Interpretação Vibracional</p>
-            <div class="ornament">✦ ◆ ✦</div>
+            <p>Sistema de Reprogramação Vibracional</p>
+            <div class="ornament">✦ ☥ ✦</div>
         </div>
 
         <!-- Client Info -->
@@ -324,11 +337,12 @@ export function generateReportHTML(
 
         <!-- Top 3 Spheres -->
         <div class="section">
-            <h2 class="section-title">Top 3 Esferas Prioritárias</h2>
+            <h2 class="section-title">🎯 Top 3 Esferas Prioritárias</h2>
             <div class="spheres-grid">
-                ${relatorio.top3Esferas.map((esfera) => {
-                  const dados = ESFERAS_DATA[esfera.esfera];
-                  return `
+                ${relatorio.top3Esferas
+                  .map((esfera) => {
+                    const dados = ESFERAS_DATA[esfera.esfera];
+                    return `
                     <div class="sphere-card">
                         <div class="sphere-icon">${dados.icone}</div>
                         <div class="sphere-name">${dados.nome}</div>
@@ -336,25 +350,26 @@ export function generateReportHTML(
                         <div class="sphere-archetype">${dados.arquetipo}</div>
                     </div>
                   `;
-                }).join('')}
+                  })
+                  .join('')}
             </div>
         </div>
 
         <!-- Core and Archetype -->
         <div class="core-archetype">
-            <div class="core-box">
-                <h3>Núcleo Predominante</h3>
-                <div class="core-value">${relatorio.nucleoPredominante}</div>
+            <div class="core-box" style="border-left: 4px solid ${nucleoColor}">
+                <h3>🔮 Núcleo Predominante</h3>
+                <div class="core-value" style="color: ${nucleoColor}">${relatorio.nucleoPredominante}</div>
             </div>
             <div class="archetype-box">
-                <h3>Arquétipo Dominante</h3>
+                <h3>✨ Arquétipo Dominante</h3>
                 <div class="archetype-value">${relatorio.arquetipioDominante}</div>
             </div>
         </div>
 
         <!-- Thoth Message -->
         <div class="section">
-            <h2 class="section-title">Mensagem de Thoth</h2>
+            <h2 class="section-title">📜 Mensagem de Thoth</h2>
             <div class="thoth-message">
                 "${relatorio.mensagemThoth}"
             </div>
@@ -362,28 +377,28 @@ export function generateReportHTML(
 
         <!-- Frequencies -->
         <div class="section">
-            <h2 class="section-title">Frequências Recomendadas</h2>
+            <h2 class="section-title">🎵 Frequências Recomendadas</h2>
             <div class="frequencies">
-                ${relatorio.frequenciasRecomendadas.map((freq) => 
-                  `<div class="frequency-badge">${freq} Hz</div>`
-                ).join('')}
+                ${relatorio.frequenciasRecomendadas
+                  .map((freq) => `<div class="frequency-badge">${freq} Hz</div>`)
+                  .join('')}
             </div>
         </div>
 
         <!-- Commands -->
         <div class="section">
-            <h2 class="section-title">Comandos da Mesa</h2>
+            <h2 class="section-title">⚡ Comandos da Mesa</h2>
             <ul class="commands-list">
-                ${relatorio.comandosMesa.map((cmd) => 
-                  `<li>${cmd}</li>`
-                ).join('')}
+                ${relatorio.comandosMesa.map((cmd) => `<li>${cmd}</li>`).join('')}
             </ul>
         </div>
 
         <!-- 21 Day Plan -->
-        ${relatorio.plano21Dias ? `
+        ${
+          relatorio.plano21Dias
+            ? `
         <div class="section">
-            <h2 class="section-title">Plano de 21 Dias</h2>
+            <h2 class="section-title">📅 Plano de 21 Dias</h2>
             <div class="plan-section">
                 <div class="plan-item">
                     <div class="plan-label">Fase</div>
@@ -400,18 +415,20 @@ export function generateReportHTML(
                 <div class="plan-item">
                     <div class="plan-label">Decretos Diários</div>
                     <ul class="decrees-list">
-                        ${relatorio.plano21Dias.decretosDiarios.map((decreto: string) => 
-                          `<li>${decreto}</li>`
-                        ).join('')}
+                        ${relatorio.plano21Dias.decretosDiarios
+                          .map((decreto: string) => `<li>${decreto}</li>`)
+                          .join('')}
                     </ul>
                 </div>
             </div>
         </div>
-        ` : ''}
+        `
+            : ''
+        }
 
         <!-- Footer -->
         <div class="footer">
-            <div class="footer-ornament">✦ ◆ ✦</div>
+            <div class="footer-ornament">✦ ☥ ✦</div>
             <p>Sistema THOTH 12 - LUNARA</p>
             <p>Interpretação Vibracional Sagrada</p>
             <p>Documento gerado automaticamente - ${new Date().toLocaleDateString('pt-BR')}</p>
@@ -426,10 +443,6 @@ export function generateReportHTML(
 
 /**
  * Exportar relatório como PDF (requer integração com biblioteca PDF)
- * Esta é uma função stub que pode ser expandida com bibliotecas como:
- * - react-native-pdf-lib
- * - react-native-html-to-pdf
- * - expo-print
  */
 export async function exportReportToPDF(
   relatorio: RelatorioSagrado,

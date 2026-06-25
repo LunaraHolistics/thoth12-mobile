@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { ScrollView, View, Text, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
-import type { DocumentPickerAsset } from 'expo-document-picker';
 import { ScreenContainer } from '@/components/screen-container';
 import { useRouter } from 'expo-router';
 import { cn } from '@/lib/utils';
@@ -58,7 +57,6 @@ export default function InputScreen() {
   };
 
   const handleNext = async () => {
-    // Validação básica
     if (!formData.nome?.trim()) {
       Alert.alert('Erro', 'Por favor, preencha o nome do cliente');
       return;
@@ -77,7 +75,6 @@ export default function InputScreen() {
     setLoading(true);
 
     try {
-      // Salvar dados no AsyncStorage e navegar para próxima tela
       const sessionData = {
         ...formData,
         fotoPerfil,
@@ -86,7 +83,6 @@ export default function InputScreen() {
         dataAtendimento: new Date().toISOString(),
       };
 
-      // Salvar cliente
       await saveCliente(sessionData as DadosCliente);
 
       router.push({
@@ -101,27 +97,35 @@ export default function InputScreen() {
   };
 
   return (
-    <ScreenContainer className="bg-gradient-to-b from-[#1B1B3A] to-[#0F0F1E]">
+    <ScreenContainer className="bg-gradient-to-b from-thothBlue to-[#0F0F1E]">
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
-        className="p-6"
+        className="p-4"
       >
-        {/* Header */}
-        <View className="mb-8 items-center">
-          <Text className="text-4xl font-bold text-[#D4AF37] mb-2">THOTH 12</Text>
-          <Text className="text-base text-[#E8D4A8] text-center">
-            Sistema de Interpretação Vibracional
+        {/* Header com Ornamentos */}
+        <View className="mb-6 items-center">
+          <Text className="text-4xl mb-2">𓂀</Text>
+          <Text className="text-3xl font-bold text-thothGold mb-1">Novo Atendimento</Text>
+          <Text className="text-sm text-thothRoseGold/80 text-center">
+            Sistema de Reprogramação Vibracional
           </Text>
+          <View className="flex-row items-center mt-2">
+            <View className="h-px w-16 bg-thothGold/50" />
+            <Text className="mx-2 text-thothGold">☥</Text>
+            <View className="h-px w-16 bg-thothGold/50" />
+          </View>
         </View>
 
         {/* Form Section */}
-        <View className="gap-6">
+        <View className="gap-5">
           {/* Nome */}
           <View>
-            <Text className="text-sm font-semibold text-[#D4AF37] mb-2">Nome do Cliente</Text>
+            <Text className="text-sm font-semibold text-thothGold mb-2">
+              👤 Nome do Cliente
+            </Text>
             <TextInput
-              className="bg-[#2A2A4A] text-white p-4 rounded-lg border border-[#D4AF37]/30"
+              className="bg-surface text-foreground p-4 rounded-lg border border-thothGold/30"
               placeholder="Digite o nome completo"
               placeholderTextColor="#9BA1A6"
               value={formData.nome}
@@ -131,9 +135,11 @@ export default function InputScreen() {
 
           {/* Data de Nascimento */}
           <View>
-            <Text className="text-sm font-semibold text-[#D4AF37] mb-2">Data de Nascimento</Text>
+            <Text className="text-sm font-semibold text-thothGold mb-2">
+              📅 Data de Nascimento
+            </Text>
             <TextInput
-              className="bg-[#2A2A4A] text-white p-4 rounded-lg border border-[#D4AF37]/30"
+              className="bg-surface text-foreground p-4 rounded-lg border border-thothGold/30"
               placeholder="DD/MM/YYYY"
               placeholderTextColor="#9BA1A6"
               value={formData.dataNascimento}
@@ -142,11 +148,11 @@ export default function InputScreen() {
           </View>
 
           {/* Cidade e Estado */}
-          <View className="flex-row gap-4">
+          <View className="flex-row gap-3">
             <View className="flex-1">
-              <Text className="text-sm font-semibold text-[#D4AF37] mb-2">Cidade</Text>
+              <Text className="text-sm font-semibold text-thothGold mb-2">🏙️ Cidade</Text>
               <TextInput
-                className="bg-[#2A2A4A] text-white p-4 rounded-lg border border-[#D4AF37]/30"
+                className="bg-surface text-foreground p-4 rounded-lg border border-thothGold/30"
                 placeholder="Cidade"
                 placeholderTextColor="#9BA1A6"
                 value={formData.cidade}
@@ -154,9 +160,9 @@ export default function InputScreen() {
               />
             </View>
             <View className="flex-1">
-              <Text className="text-sm font-semibold text-[#D4AF37] mb-2">Estado</Text>
+              <Text className="text-sm font-semibold text-thothGold mb-2">📍 Estado</Text>
               <TextInput
-                className="bg-[#2A2A4A] text-white p-4 rounded-lg border border-[#D4AF37]/30"
+                className="bg-surface text-foreground p-4 rounded-lg border border-thothGold/30"
                 placeholder="UF"
                 placeholderTextColor="#9BA1A6"
                 maxLength={2}
@@ -168,20 +174,19 @@ export default function InputScreen() {
 
           {/* Foto de Perfil */}
           <View>
-            <Text className="text-sm font-semibold text-[#D4AF37] mb-2">Foto de Perfil (Opcional)</Text>
+            <Text className="text-sm font-semibold text-thothGold mb-2">
+              📷 Foto de Perfil (Opcional)
+            </Text>
             <TouchableOpacity
               onPress={pickImage}
-              className="bg-[#2A2A4A] border-2 border-dashed border-[#D4AF37]/50 rounded-lg p-6 items-center"
+              className="bg-surface border-2 border-dashed border-thothGold/50 rounded-lg p-6 items-center"
             >
               {fotoPerfil ? (
-                <Image
-                  source={{ uri: fotoPerfil }}
-                  className="w-24 h-24 rounded-lg"
-                />
+                <Image source={{ uri: fotoPerfil }} className="w-24 h-24 rounded-lg" />
               ) : (
                 <View className="items-center">
-                  <Text className="text-3xl mb-2">📷</Text>
-                  <Text className="text-[#E8D4A8] text-center">Toque para selecionar foto</Text>
+                  <Text className="text-4xl mb-2">📷</Text>
+                  <Text className="text-foreground text-center">Toque para selecionar foto</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -189,22 +194,24 @@ export default function InputScreen() {
 
           {/* Áudio Testemunho */}
           <View>
-            <Text className="text-sm font-semibold text-[#D4AF37] mb-2">
-              Áudio Testemunho Quântico (até 3 min)
+            <Text className="text-sm font-semibold text-thothGold mb-2">
+              🎙️ Áudio Testemunho Quântico (até 3 min)
             </Text>
             <TouchableOpacity
               onPress={pickAudio}
-              className="bg-[#2A2A4A] border-2 border-dashed border-[#D4AF37]/50 rounded-lg p-6 items-center"
+              className="bg-surface border-2 border-dashed border-thothGold/50 rounded-lg p-6 items-center"
             >
               {audioTestemunho ? (
                 <View className="items-center">
-                  <Text className="text-3xl mb-2">🎙️</Text>
-                  <Text className="text-[#E8D4A8]">Áudio selecionado</Text>
+                  <Text className="text-4xl mb-2">🎙️</Text>
+                  <Text className="text-foreground">Áudio selecionado</Text>
                 </View>
               ) : (
                 <View className="items-center">
-                  <Text className="text-3xl mb-2">🎵</Text>
-                  <Text className="text-[#E8D4A8] text-center">Toque para selecionar áudio</Text>
+                  <Text className="text-4xl mb-2">🎵</Text>
+                  <Text className="text-foreground text-center">
+                    Toque para selecionar áudio
+                  </Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -212,9 +219,11 @@ export default function InputScreen() {
 
           {/* Problema Principal */}
           <View>
-            <Text className="text-sm font-semibold text-[#D4AF37] mb-2">Problema Principal Relatado</Text>
+            <Text className="text-sm font-semibold text-thothGold mb-2">
+              📝 Problema Principal Relatado
+            </Text>
             <TextInput
-              className="bg-[#2A2A4A] text-white p-4 rounded-lg border border-[#D4AF37]/30 h-24"
+              className="bg-surface text-foreground p-4 rounded-lg border border-thothGold/30 h-28"
               placeholder="Descreva o principal desafio ou questão..."
               placeholderTextColor="#9BA1A6"
               multiline
@@ -230,21 +239,23 @@ export default function InputScreen() {
             onPress={handleNext}
             disabled={loading}
             className={cn(
-              'bg-gradient-to-r from-[#D4AF37] to-[#E8D4A8] p-4 rounded-lg items-center mt-4',
+              'bg-gradient-to-r from-thothGold to-thothRoseGold p-4 rounded-lg items-center mt-2 shadow-lg',
               loading && 'opacity-50'
             )}
           >
-            <Text className="text-[#1B1B3A] font-bold text-lg">
-              {loading ? 'Processando...' : 'Iniciar Mapeamento'}
+            <Text className="text-thothBlue font-bold text-lg">
+              {loading ? '⏳ Processando...' : '✨ Iniciar Mapeamento'}
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* Footer */}
-        <View className="mt-8 pt-6 border-t border-[#D4AF37]/20">
-          <Text className="text-xs text-[#9BA1A6] text-center">
-            Sistema THOTH 12 - LUNARA {'\n'}
-            Interpretação Vibracional Sagrada
+        <View className="mt-6 pt-4 border-t border-thothGold/20 items-center">
+          <Text className="text-xs text-muted text-center">
+            Sistema THOTH 12 - LUNARA
+          </Text>
+          <Text className="text-xs text-thothGold/50 mt-1">
+            ✨ Interpretação Vibracional Sagrada ✨
           </Text>
         </View>
       </ScrollView>
