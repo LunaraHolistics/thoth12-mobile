@@ -2,15 +2,39 @@ import React, { useState, useEffect } from 'react';
 import { ScrollView, View, Text, TouchableOpacity, Alert, Dimensions } from 'react-native';
 import { ScreenContainer } from '@/components/screen-container';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { RelatorioSagrado, ESFERAS_DATA } from '@/lib/thoth-data';
+import { RelatorioSagrado, ESFERAS_DATA, Esfera, obterInterpretacao } from '@/lib/thoth-data';
 import { getSessaoById } from '@/lib/storage-service';
 import { cn } from '@/lib/utils';
+
+// Lista das 12 esferas (definida localmente)
+const ESFERAS_LIST: Esfera[] = [
+  'corpo',
+  'energia_vital',
+  'emocoes',
+  'mente',
+  'espiritualidade',
+  'relacionamentos',
+  'familia',
+  'trabalho',
+  'prosperidade',
+  'missao',
+  'protecao',
+  'legado',
+];
+
+// Cores dos núcleos
+const NUCLEO_COLORS = {
+  identidade: { bg: '#6B21A8', text: '#FFFFFF' },
+  seguranca: { bg: '#008000', text: '#FFFFFF' },
+  merecimento: { bg: '#FFD700', text: '#1B1B3A' },
+};
 
 export default function ReportScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [relatorio, setRelatorio] = useState<RelatorioSagrado | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showAllSpheres, setShowAllSpheres] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -33,145 +57,294 @@ export default function ReportScreen() {
   }, [params.sessionId]);
 
   const handleExportarPDF = async () => {
-    Alert.alert('PDF', 'Funcionalidade de exportação em desenvolvimento');
-    // TODO: Implementar exportação de PDF
+    Alert.alert(
+      'Exportar PDF',
+      'A funcionalidade de exportação em PDF será implementada na próxima versão.',
+      [{ text: 'OK' }]
+    );
+  };
+
+  const handleIniciarCiclo21 = () => {
+    Alert.alert(
+      'Ciclo de 21 Dias',
+      'Você está prestes a iniciar sua jornada de transformação de 21 dias. Deseja continuar?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Iniciar Jornada',
+          onPress: () => {
+            router.push({
+              pathname: '/(tabs)/cycle-screen',
+              params: { sessionId: params.sessionId },
+            });
+          },
+        },
+      ]
+    );
   };
 
   if (loading) {
     return (
-      <ScreenContainer className="bg-gradient-to-b from-[#1B1B3A] to-[#0F0F1E] items-center justify-center">
-        <Text className="text-[#D4AF37] text-lg">Carregando relatório...</Text>
+      <ScreenContainer className="bg-gradient-to-b from-thothBlue to-[#0F0F1E] items-center justify-center">
+        <Text className="text-4xl mb-4">☥</Text>
+        <Text className="text-thothGold text-lg">Preparando seu Relatório Sagrado...</Text>
       </ScreenContainer>
     );
   }
 
   if (!relatorio) {
     return (
-      <ScreenContainer className="bg-gradient-to-b from-[#1B1B3A] to-[#0F0F1E] items-center justify-center">
+      <ScreenContainer className="bg-gradient-to-b from-thothBlue to-[#0F0F1E] items-center justify-center">
         <View className="gap-4 items-center">
-          <Text className="text-[#D4AF37] text-lg">Relatório não encontrado</Text>
+          <Text className="text-4xl">𓁹</Text>
+          <Text className="text-thothGold text-lg">Relatório não encontrado</Text>
           <TouchableOpacity
             onPress={() => router.push('/(tabs)')}
-            className="bg-[#D4AF37] px-6 py-3 rounded-lg"
+            className="bg-thothGold px-6 py-3 rounded-lg"
           >
-            <Text className="text-[#1B1B3A] font-bold">Voltar</Text>
+            <Text className="text-thothBlue font-bold">Voltar</Text>
           </TouchableOpacity>
         </View>
       </ScreenContainer>
     );
   }
 
+  const nucleoColor = NUCLEO_COLORS[relatorio.nucleoPredominante];
+
   return (
-    <ScreenContainer className="bg-gradient-to-b from-[#1B1B3A] to-[#0F0F1E]">
+    <ScreenContainer className="bg-gradient-to-b from-thothBlue to-[#0F0F1E]">
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
-        className="p-6"
+        className="p-4"
       >
-        {/* Header */}
+        {/* Header Ornamental */}
         <View className="mb-6 items-center">
-          <Text className="text-3xl font-bold text-[#D4AF37] mb-1">Relatório Sagrado</Text>
-          <Text className="text-sm text-[#E8D4A8]">THOTH 12 - Interpretação Vibracional</Text>
+          <Text className="text-4xl mb-2">𓂀</Text>
+          <Text className="text-3xl font-bold text-thothGold mb-1">Relatório Sagrado</Text>
+          <Text className="text-sm text-thothRoseGold/80 text-center">
+            Sistema de Reprogramação Vibracional
+          </Text>
+          <View className="flex-row items-center mt-2">
+            <View className="h-px w-16 bg-thothGold/50" />
+            <Text className="mx-2 text-thothGold">☥</Text>
+            <View className="h-px w-16 bg-thothGold/50" />
+          </View>
         </View>
 
-        {/* Top 3 Esferas */}
-        <View className="bg-[#2A2A4A] border border-[#D4AF37]/30 rounded-lg p-4 mb-6">
-          <Text className="text-lg font-bold text-[#D4AF37] mb-4">Top 3 Esferas Prioritárias</Text>
+        {/* Top 3 Esferas Prioritárias */}
+        <View className="bg-surface border border-thothGold/30 rounded-lg p-4 mb-4">
+          <View className="flex-row items-center mb-3">
+            <Text className="text-2xl mr-2">🎯</Text>
+            <Text className="text-lg font-bold text-thothGold">Top 3 Esferas Prioritárias</Text>
+          </View>
           {relatorio.top3Esferas.map((esfera, index) => {
             const dados = ESFERAS_DATA[esfera.esfera];
+            const nucleoColors = NUCLEO_COLORS[esfera.nucleo];
+            const medalhas = ['🥇', '🥈', '🥉'];
+
             return (
-              <View key={index} className="mb-3 pb-3 border-b border-[#D4AF37]/20 last:border-b-0 last:mb-0 last:pb-0">
+              <View
+                key={index}
+                className="mb-3 pb-3 border-b border-thothGold/20 last:border-b-0 last:mb-0 last:pb-0"
+              >
                 <View className="flex-row items-center justify-between mb-1">
                   <View className="flex-row items-center gap-2 flex-1">
+                    <Text className="text-2xl">{medalhas[index]}</Text>
                     <Text className="text-2xl">{dados.icone}</Text>
                     <View className="flex-1">
-                      <Text className="text-sm font-semibold text-[#D4AF37]">{dados.nome}</Text>
-                      <Text className="text-xs text-[#9BA1A6]">{dados.arquetipo}</Text>
+                      <Text className="text-sm font-semibold text-thothGold">{dados.nome}</Text>
+                      <Text className="text-xs text-muted">{dados.arquetipo}</Text>
                     </View>
                   </View>
                   <View className="items-end">
-                    <Text className="text-lg font-bold text-[#D4AF37]">{esfera.intensidade}%</Text>
-                    <Text className="text-xs text-[#E8D4A8] capitalize">{esfera.nucleo}</Text>
+                    <Text className="text-lg font-bold text-thothGold">{esfera.intensidade}%</Text>
+                    <View
+                      className="px-2 py-0.5 rounded mt-1"
+                      style={{ backgroundColor: nucleoColors.bg }}
+                    >
+                      <Text className="text-xs font-semibold" style={{ color: nucleoColors.text }}>
+                        {esfera.nucleo === 'identidade' && 'Identidade'}
+                        {esfera.nucleo === 'seguranca' && 'Segurança'}
+                        {esfera.nucleo === 'merecimento' && 'Merecimento'}
+                      </Text>
+                    </View>
                   </View>
                 </View>
-                {esfera.observacoes && (
-                  <Text className="text-xs text-[#9BA1A6] ml-8">{esfera.observacoes}</Text>
-                )}
+                {esfera.observacoes ? (
+                  <Text className="text-xs text-muted ml-12 italic">{esfera.observacoes}</Text>
+                ) : null}
               </View>
             );
           })}
         </View>
 
+        {/* Gráfico de Todas as Esferas */}
+        <TouchableOpacity
+          onPress={() => setShowAllSpheres(!showAllSpheres)}
+          className="bg-surface border border-thothGold/30 rounded-lg p-4 mb-4"
+        >
+          <View className="flex-row items-center justify-between mb-2">
+            <View className="flex-row items-center">
+              <Text className="text-2xl mr-2">📊</Text>
+              <Text className="text-sm font-semibold text-thothGold">
+                Mapa Completo das 12 Esferas
+              </Text>
+            </View>
+            <Text className="text-thothGold">{showAllSpheres ? '▲' : '▼'}</Text>
+          </View>
+
+          {showAllSpheres && (
+            <View className="mt-2">
+              {ESFERAS_LIST.map((esfera: Esfera) => {
+                const dados = ESFERAS_DATA[esfera];
+                const mapeamento = relatorio.top3Esferas.find((m) => m.esfera === esfera);
+                const intensidade = mapeamento?.intensidade || 0;
+
+                return (
+                  <View key={esfera} className="mb-2">
+                    <View className="flex-row items-center justify-between mb-1">
+                      <View className="flex-row items-center flex-1">
+                        <Text className="text-lg mr-2">{dados.icone}</Text>
+                        <Text className="text-xs text-foreground flex-1">{dados.nome}</Text>
+                      </View>
+                      <Text className="text-xs font-bold text-thothGold w-10 text-right">
+                        {intensidade}%
+                      </Text>
+                    </View>
+                    <View className="h-2 bg-background rounded-full overflow-hidden">
+                      <View
+                        className="h-full bg-thothGold rounded-full"
+                        style={{ width: `${intensidade}%` }}
+                      />
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+        </TouchableOpacity>
+
         {/* Núcleo Predominante */}
-        <View className="bg-[#2A2A4A] border border-[#D4AF37]/30 rounded-lg p-4 mb-6">
-          <Text className="text-sm font-semibold text-[#D4AF37] mb-2">Núcleo Predominante</Text>
-          <Text className="text-2xl font-bold text-[#E8D4A8] capitalize mb-2">
-            {relatorio.nucleoPredominante}
-          </Text>
-          <Text className="text-sm text-[#9BA1A6]">Arquétipo: {relatorio.arquetipioDominante}</Text>
+        <View
+          className="bg-surface border border-thothGold/30 rounded-lg p-4 mb-4"
+          style={{ borderLeftWidth: 4, borderLeftColor: nucleoColor.bg }}
+        >
+          <View className="flex-row items-center mb-2">
+            <Text className="text-2xl mr-2">🔮</Text>
+            <Text className="text-sm font-semibold text-thothGold">Núcleo Predominante</Text>
+          </View>
+          <View className="flex-row items-center justify-between">
+            <View>
+              <Text className="text-2xl font-bold capitalize" style={{ color: nucleoColor.bg }}>
+                {relatorio.nucleoPredominante === 'identidade' && 'Identidade'}
+                {relatorio.nucleoPredominante === 'seguranca' && 'Segurança'}
+                {relatorio.nucleoPredominante === 'merecimento' && 'Merecimento'}
+              </Text>
+              <Text className="text-sm text-muted mt-1">
+                Arquétipo: {relatorio.arquetipioDominante}
+              </Text>
+            </View>
+            <View
+              className="w-16 h-16 rounded-full items-center justify-center"
+              style={{ backgroundColor: nucleoColor.bg }}
+            >
+              <Text className="text-3xl" style={{ color: nucleoColor.text }}>
+                ☥
+              </Text>
+            </View>
+          </View>
         </View>
 
         {/* Mensagem de Thoth */}
-        <View className="bg-[#2A2A4A] border border-[#D4AF37]/30 rounded-lg p-4 mb-6">
-          <Text className="text-sm font-semibold text-[#D4AF37] mb-3">Mensagem de Thoth</Text>
-          <Text className="text-base text-[#E8D4A8] leading-relaxed italic">
-            "{relatorio.mensagemThoth}"
-          </Text>
+        <View className="bg-surface border border-thothGold/30 rounded-lg p-4 mb-4">
+          <View className="flex-row items-center mb-3">
+            <Text className="text-2xl mr-2">📜</Text>
+            <Text className="text-sm font-semibold text-thothGold">Mensagem de Thoth</Text>
+          </View>
+          <View className="bg-background/50 rounded-lg p-3 border-l-4 border-thothGold">
+            <Text className="text-base text-foreground leading-relaxed italic">
+              "{relatorio.mensagemThoth}"
+            </Text>
+          </View>
         </View>
 
         {/* Frequências Recomendadas */}
-        <View className="bg-[#2A2A4A] border border-[#D4AF37]/30 rounded-lg p-4 mb-6">
-          <Text className="text-sm font-semibold text-[#D4AF37] mb-3">Frequências Recomendadas (Hz)</Text>
+        <View className="bg-surface border border-thothGold/30 rounded-lg p-4 mb-4">
+          <View className="flex-row items-center mb-3">
+            <Text className="text-2xl mr-2">🎵</Text>
+            <Text className="text-sm font-semibold text-thothGold">
+              Frequências Recomendadas (Hz)
+            </Text>
+          </View>
           <View className="flex-row flex-wrap gap-2">
             {relatorio.frequenciasRecomendadas.map((freq, index) => (
               <View
                 key={index}
-                className="bg-[#1B1B3A] border border-[#D4AF37] rounded-lg px-3 py-2"
+                className="bg-thothBlue border border-thothGold rounded-lg px-3 py-2"
               >
-                <Text className="text-sm font-semibold text-[#D4AF37]">{freq} Hz</Text>
+                <Text className="text-sm font-semibold text-thothGold">{freq} Hz</Text>
               </View>
             ))}
           </View>
         </View>
 
         {/* Comandos da Mesa */}
-        <View className="bg-[#2A2A4A] border border-[#D4AF37]/30 rounded-lg p-4 mb-6">
-          <Text className="text-sm font-semibold text-[#D4AF37] mb-3">Comandos da Mesa</Text>
-          {relatorio.comandosMesa.map((comando, index) => (
-            <View key={index} className="mb-2 pb-2 border-b border-[#D4AF37]/20 last:border-b-0 last:mb-0 last:pb-0">
-              <Text className="text-sm text-[#E8D4A8]">
-                <Text className="font-bold">{index + 1}. </Text>
-                {comando}
-              </Text>
-            </View>
-          ))}
+        <View className="bg-surface border border-thothGold/30 rounded-lg p-4 mb-4">
+          <View className="flex-row items-center mb-3">
+            <Text className="text-2xl mr-2">⚡</Text>
+            <Text className="text-sm font-semibold text-thothGold">Comandos da Mesa Radiônica</Text>
+          </View>
+          <View className="flex-row gap-2">
+            {relatorio.comandosMesa.map((comando, index) => (
+              <View
+                key={index}
+                className="flex-1 bg-thothGold/10 border border-thothGold/50 rounded-lg p-3 items-center"
+              >
+                <Text className="text-xs text-muted mb-1">Fase {index + 1}</Text>
+                <Text className="text-sm font-bold text-thothGold">{comando}</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
         {/* Plano de 21 Dias */}
         {relatorio.plano21Dias && (
-          <View className="bg-[#2A2A4A] border border-[#D4AF37]/30 rounded-lg p-4 mb-6">
-            <Text className="text-sm font-semibold text-[#D4AF37] mb-3">Plano de 21 Dias</Text>
-            <View className="gap-2">
-              <View>
-                <Text className="text-xs text-[#9BA1A6]">Fase</Text>
-                <Text className="text-base font-semibold text-[#E8D4A8]">
-                  {relatorio.plano21Dias.fase}
+          <View className="bg-surface border border-thothGold/30 rounded-lg p-4 mb-4">
+            <View className="flex-row items-center mb-3">
+              <Text className="text-2xl mr-2">📅</Text>
+              <Text className="text-sm font-semibold text-thothGold">Plano de 21 Dias</Text>
+            </View>
+
+            <View className="gap-3">
+              <View className="bg-background/50 rounded-lg p-3">
+                <Text className="text-xs text-muted mb-1">FASE</Text>
+                <Text className="text-base font-semibold text-foreground">
+                  Fase {relatorio.plano21Dias.fase}
                 </Text>
               </View>
-              <View>
-                <Text className="text-xs text-[#9BA1A6]">Exercício Prático</Text>
-                <Text className="text-sm text-[#E8D4A8]">{relatorio.plano21Dias.exercicioPratico}</Text>
+
+              <View className="bg-background/50 rounded-lg p-3">
+                <Text className="text-xs text-muted mb-1">EXERCÍCIO PRÁTICO</Text>
+                <Text className="text-sm text-foreground">
+                  {relatorio.plano21Dias.exercicioPratico}
+                </Text>
               </View>
-              <View>
-                <Text className="text-xs text-[#9BA1A6]">Meta Mensurável</Text>
-                <Text className="text-sm text-[#E8D4A8]">{relatorio.plano21Dias.metaMensuravel}</Text>
+
+              <View className="bg-background/50 rounded-lg p-3">
+                <Text className="text-xs text-muted mb-1">META MENSURÁVEL</Text>
+                <Text className="text-sm text-foreground">
+                  {relatorio.plano21Dias.metaMensuravel}
+                </Text>
               </View>
-              <View>
-                <Text className="text-xs text-[#9BA1A6] mb-2">Decretos Diários</Text>
+
+              <View className="bg-background/50 rounded-lg p-3">
+                <Text className="text-xs text-muted mb-2">DECRETOS DIÁRIOS</Text>
                 {relatorio.plano21Dias.decretosDiarios.map((decreto: string, idx: number) => (
-                  <Text key={idx} className="text-sm text-[#D4AF37] mb-1">
-                    • {decreto}
-                  </Text>
+                  <View key={idx} className="flex-row items-start mb-2 last:mb-0">
+                    <Text className="text-thothGold mr-2">☥</Text>
+                    <Text className="text-sm text-foreground flex-1 italic">{decreto}</Text>
+                  </View>
                 ))}
               </View>
             </View>
@@ -181,25 +354,34 @@ export default function ReportScreen() {
         {/* Botões de Ação */}
         <View className="gap-3 mb-6">
           <TouchableOpacity
-            onPress={handleExportarPDF}
-            className="bg-gradient-to-r from-[#D4AF37] to-[#E8D4A8] p-4 rounded-lg items-center"
+            onPress={handleIniciarCiclo21}
+            className="bg-gradient-to-r from-thothGreen to-thothGold p-4 rounded-lg items-center shadow-lg"
           >
-            <Text className="text-[#1B1B3A] font-bold text-lg">Exportar PDF</Text>
+            <Text className="text-thothBlue font-bold text-lg">🌟 Iniciar Ciclo de 21 Dias</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleExportarPDF}
+            className="bg-gradient-to-r from-thothGold to-thothRoseGold p-4 rounded-lg items-center"
+          >
+            <Text className="text-thothBlue font-bold text-lg">📄 Exportar PDF</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => router.push('/(tabs)')}
-            className="bg-[#2A2A4A] border border-[#D4AF37] p-4 rounded-lg items-center"
+            className="bg-surface border border-thothGold p-4 rounded-lg items-center"
           >
-            <Text className="text-[#D4AF37] font-bold text-lg">Voltar ao Início</Text>
+            <Text className="text-thothGold font-bold text-lg">☥ Voltar ao Início</Text>
           </TouchableOpacity>
         </View>
 
         {/* Footer */}
-        <View className="pt-4 border-t border-[#D4AF37]/20">
-          <Text className="text-xs text-[#9BA1A6] text-center">
-            Sistema THOTH 12 - LUNARA {'\n'}
-            Interpretação Vibracional Sagrada
+        <View className="pt-4 border-t border-thothGold/20 items-center">
+          <Text className="text-xs text-muted text-center">
+            Sistema THOTH 12 - LUNARA
+          </Text>
+          <Text className="text-xs text-thothGold/50 mt-1">
+            ✨ Interpretação Vibracional Sagrada ✨
           </Text>
         </View>
       </ScrollView>
