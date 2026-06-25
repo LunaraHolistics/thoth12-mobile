@@ -16,7 +16,7 @@
     "lint": "expo lint",
     "format": "prettier --write .",
     "test": "vitest run",
-    "db:push": "drizzle-kit push",
+    "db:push": "drizzle-kit push:mysql",
     "db:seed": "tsx scripts/seed-database.ts",
     "db:reset": "drizzle-kit reset && pnpm db:push && pnpm db:seed",
     "email:cycle": "tsx scripts/send-cycle-emails.ts",
