@@ -3,6 +3,9 @@
  * Generates beautiful PDF reports with Egyptian ornamental design
  */
 
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
+import { Platform } from 'react-native';
 import { RelatorioSagrado, ESFERAS_DATA, NUCLEOS_DATA } from './thoth-data';
 
 interface PDFGeneratorOptions {
@@ -56,11 +59,10 @@ export function generateReportHTML(
 
         .page {
             width: 210mm;
-            height: 297mm;
+            min-height: 297mm;
             padding: 20mm;
             margin: 0 auto;
             background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
-            page-break-after: always;
         }
 
         /* Header com ornamentação egípcia */
@@ -442,22 +444,23 @@ export function generateReportHTML(
 }
 
 /**
- * Exportar relatório como PDF (requer integração com biblioteca PDF)
+ * Exportar relatório como PDF usando expo-print
  */
 export async function exportReportToPDF(
   relatorio: RelatorioSagrado,
   options: PDFGeneratorOptions = {}
-): Promise<string | null> {
+): Promise<{ uri: string } | null> {
   try {
     const html = generateReportHTML(relatorio, options);
     
-    // TODO: Implementar exportação real usando:
-    // - expo-print para iOS
-    // - react-native-html-to-pdf para Android
-    // - Salvar em DocumentDirectory
-    
-    console.log('PDF HTML gerado com sucesso');
-    return html;
+    // Gerar PDF usando expo-print
+    const { uri } = await Print.printToFileAsync({
+      html,
+      base64: false,
+    });
+
+    console.log('PDF gerado com sucesso:', uri);
+    return { uri };
   } catch (error) {
     console.error('Erro ao exportar PDF:', error);
     return null;
@@ -465,21 +468,59 @@ export async function exportReportToPDF(
 }
 
 /**
- * Compartilhar relatório via email ou WhatsApp
+ * Compartilhar relatório via sistema nativo (WhatsApp, Email, etc)
  */
 export async function shareReport(
   relatorio: RelatorioSagrado,
-  method: 'email' | 'whatsapp' = 'email'
+  options: PDFGeneratorOptions = {}
 ): Promise<boolean> {
   try {
-    // TODO: Implementar compartilhamento usando:
-    // - expo-mail-composer para email
-    // - react-native-share para WhatsApp
+    // Gerar PDF primeiro
+    const pdfResult = await exportReportToPDF(relatorio, options);
     
-    console.log(`Compartilhando relatório via ${method}`);
+    if (!pdfResult) {
+      throw new Error('Falha ao gerar PDF');
+    }
+
+    // Compartilhar usando expo-sharing
+    const isAvailable = await Sharing.isAvailableAsync();
+    
+    if (!isAvailable) {
+      throw new Error('Compartilhamento não disponível neste dispositivo');
+    }
+
+    await Sharing.shareAsync(pdfResult.uri, {
+      mimeType: 'application/pdf',
+      dialogTitle: 'Compartilhar Relatório Sagrado',
+      UTI: 'com.adobe.pdf',
+    });
+
+    console.log('Relatório compartilhado com sucesso');
     return true;
   } catch (error) {
     console.error('Erro ao compartilhar:', error);
+    return false;
+  }
+}
+
+/**
+ * Visualizar PDF (abrir no visualizador do sistema)
+ */
+export async function viewReport(
+  relatorio: RelatorioSagrado,
+  options: PDFGeneratorOptions = {}
+): Promise<boolean> {
+  try {
+    const html = generateReportHTML(relatorio, options);
+    
+    // Usar expo-print para visualizar
+    await Print.printAsync({
+      html,
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Erro ao visualizar PDF:', error);
     return false;
   }
 }
